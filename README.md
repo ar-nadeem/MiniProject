@@ -1,0 +1,2 @@
+# MiniProject
+For Clarity Cohort
