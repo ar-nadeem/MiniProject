@@ -72,3 +72,23 @@
 )
 )
 )
+
+;;filter the data of candidate from map
+;; (define-private (my_winner_filter (temp  { id: uint}  { candidate_name: (string-ascii 50), symbol: (string-ascii 50), candidate_count: uint }))
+;;     (begin
+;;     (if (< (var-get max_votes) (get candidate_count temp))
+;;         (ok (var-set max_votes (get candidate_count temp))
+;;             (var-set name_of_winner (get candidate_name temp)) 
+;;         )
+;;     )
+    
+;;     (ok true)
+;;     )
+;; )
+
+;; (define-public (get_winner)
+;;     (let 
+;;         (test (filter my_winner_filter candidates))
+;;     )
+;;     (ok "Election Over!")
+;; )
