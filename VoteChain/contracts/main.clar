@@ -57,7 +57,6 @@
 )
 
 (define-private (increment_count_voters (c_id uint) (c_candidate_name (string-ascii 50) ) (c_symbol (string-ascii 50)) )
-;;let allows us to create local variable in a function
 (begin
     (let
     (
