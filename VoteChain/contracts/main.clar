@@ -1,28 +1,27 @@
-
-;; Voters map with key id and value voter_name
+;; Hold voter name
 (define-map voters { id: uint } { voter_name: (string-ascii 50)} )
 
-;; Candidate map with key type id and values candidate_name,  symbol and candidate count
+;; Holds Candidate Information
 (define-map candidates { id: uint}  { candidate_name: (string-ascii 50), symbol: (string-ascii 50), candidate_count: uint })
 
-;; Max Votes Variable
+;; Variable for max_votes
 (define-data-var max_votes uint u0)
 
-;; Vote casted maps with key id and value Voter name
+;; Vote Casted by voters
 (define-map vote_casted { id: uint } { voter_name: (string-ascii 50)})
 
-;; Variable for Name of the winner candidate | Intialized with "Blank"
+;; Variable Stored name of the winner
 (define-data-var name_of_winner (string-ascii 50) "Blank" )
 
 ;;defining error 
 (define-constant castvoteagain u200)
+(define-constant non-existingid u300)
+(define-constant vote_casted_err u310)
+
 ;; variable for ids
 (define-data-var candidate_ids uint u0)
 
-;;making list for no.of counts
-(define-data-var votes (list 100 uint) (list ))
-
-;; A funtion to add voter to the map
+;; Function adds a voter to the Map
 (define-public (add_voter (voter_id uint) (votername (string-ascii 50))  )
 (begin
     (map-insert voters {id: voter_id} {voter_name: votername} )
@@ -30,63 +29,46 @@
 )
 )
 
+;; Function adds Candidate to the map
+(define-public (add_candidate (c_name (string-ascii 50)) (c_symbol (string-ascii 50)))
+(begin 
+    (map-insert candidates {id: (var-get candidate_ids)} {candidate_name: c_name, symbol: c_symbol, candidate_count: u0})
+    (var-set candidate_ids (+ (var-get candidate_ids) u1 ))
+    (ok true)
+)
+)   
 
-;;filter the data of candidate from map
-;; (define-private (my_winner_filter (temp  { id: uint}  { candidate_name: (string-ascii 50), symbol: (string-ascii 50), candidate_count: uint }))
-;;     (begin
-;;     (if (< (var-get max_votes) (get candidate_count temp))
-;;         (ok (var-set max_votes (get candidate_count temp))
-;;             (var-set name_of_winner (get candidate_name temp)) 
-;;         )
-;;     )
-    
-;;     (ok true)
-;;     )
-;; )
+(define-public (cast_vote (v_id uint) (v_name (string-ascii 50) ) (c_id uint) (c_name (string-ascii 50 ) ) (c_symbol (string-ascii 50))  )
+(begin
+(let
+    (
+        ;; Throws error of non existing-id 
+        (voter_name_Throw (get voter_name (unwrap! (map-get? voters { id: v_id }) (err non-existingid))))
+        ;; Throws error of recasting vote
+        (casted_id_Throw (get voter_name (unwrap! (map-get? vote_casted { id: v_id }) (err vote_casted_err))))
+        
+    )
+    ;; If No errors then cast the vote
+    (map-set vote_casted {id: c_id} {voter_name: v_name})
 
+    (ok "Done")
+)
+)
+)
 
-;; (define-public (add_candidate (c_name (string-ascii 50 ) ) (c_symbol (string-ascii 50)))
-;; (begin 
-;;     (map-insert candidates {id: candidate_ids} {candidate_name: c_name, symbol: c_symbol, candidate_count: 0})
-;;     (var-set candidate_ids (+ candidate_ids u1 ))
-;;     (ok true)
-;; )
+(define-private (increment_count_voters (c_id uint) (c_candidate_name (string-ascii 50) ) (c_symbol (string-ascii 50)) )
+;;let allows us to create local variable in a function
+(begin
+    (let
+    (
+        ;; Get Existing count and +1 it
+        (current_count (+ (get candidate_count (unwrap! (map-get? candidates { id: c_id }) (err non-existingid))) u1))
+        
+    )
 
-;; )   
-
-;; (define-private (increment_count_voters (v_id uint) (candidate_name (string-ascii 50) ) (c_symbol (string-ascii 50)) )
-;; ;;let allows us to create local variable in a function
-;;     (begin 
-;;     (let  
-;;     (
-;;        (current_count (default-to u0 ( get candidate_count ( map-get? candidates {id: v_id}))))
-;;     )
-;;     )
-;;     (var-set current_count (+ current_count u1))
-;;     ((map-set candidates { id: v_id}  { candidate_name: candidate_name} {symbol: c_symbol} {candidate_count: current_count}))
-;;     )
-;; )
-
-;; (define-public (cast_vote (v_id uint) (v_name (string-ascii 50) ) (c_id uint) (c_name (string-ascii 50 ) ) (c_symbol (string-ascii 50))  )
-;; (begin
-;;      ;;getting id from voters list if not present returs error
-;;      (voter_id (get id (unwrap! (map-get? voters { id: v_id }) (err non-existingid))))
-;;      ;;geting casted id and if not presnt inserts it and increase counter of candidate
-;;      (casted_id (get id (unwrap! (map-get? vote_casted { id: v_id }) (map-set vote_casted v_id v_name))))
-;;      ;;if casted id is present then prevent from casting again
-;;      (asserts (is-eq casted_id voter_id) (err castvoteagain))
-;;     ;;(increment_count_voters ((c_id) (c_name) (c_symbol)) )
-;; )
-;; )
-
-;; (define-public (get_winner)
-;;     (let 
-;;         (test (filter my_winner_filter candidates))
-;;     )
-;;     (ok "Election Over!")
-;; )
-
- ;;getwinner
- ;;indivial party vote counts
- ;;lowest voted party
- ;; study fold function
+    ;; Set it with given ids and count from let
+    (map-set candidates {id: c_id} {candidate_name: c_candidate_name, symbol: c_symbol, candidate_count: current_count})
+    (ok "Done")
+)
+)
+)
