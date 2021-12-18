@@ -67,24 +67,33 @@
 
     ;; Set it with given ids and count from let
     (map-set candidates {id: c_id} {candidate_name: c_candidate_name, symbol: c_symbol, candidate_count: current_count})
-    (ok "Done")
-)
+    
+
+    )
+    ;; Make max_votes int the the largest ammount of votes a candidate have received 
+    (if (> (var-get max_votes) (get candidate_count (unwrap! (map-get? candidates { id: c_id }) (err non-existingid))))
+     (ok (var-set max_votes (get candidate_count (unwrap! (map-get? candidates { id: c_id }) (err non-existingid)))))
+     (ok (var-set max_votes (var-get max_votes)))
+    )
+
+
 )
 )
 
 ;;filter the data of candidate from map
-;; (define-private (my_winner_filter (temp  { id: uint}  { candidate_name: (string-ascii 50), symbol: (string-ascii 50), candidate_count: uint }))
-;;     (begin
-;;     (if (< (var-get max_votes) (get candidate_count temp))
-;;         (ok (var-set max_votes (get candidate_count temp))
-;;             (var-set name_of_winner (get candidate_name temp)) 
-;;         )
-;;     )
-    
-;;     (ok true)
-;;     )
-;; )
+(define-private (my_winner_filter (c_id uint)) 
+(begin 
+    (if (is-eq (var-get max_votes) (get candidate_count (unwrap! (map-get? candidates { id: c_id }) (err non-existingid))))
+    (ok (var-set name_of_winner (get candidate_name (unwrap! (map-get? candidates { id: c_id }) (err non-existingid)))))
+    (ok (var-set name_of_winner "Blank"))
+    )
+)
+)
 
+
+
+
+;; Make this function loop from candidate ids to select the winner
 ;; (define-public (get_winner)
 ;;     (let 
 ;;         (test (filter my_winner_filter candidates))
