@@ -2,4 +2,4 @@
 For Clarity Cohort
 
 # What is it ?
-Emails using bitcoin smart contract.
+Voting based on smart contracts.
